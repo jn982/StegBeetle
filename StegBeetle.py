@@ -70,8 +70,17 @@ class Hide(tk.Frame):
         label = tk.Label(self, text="What would you like to hide?", font=controller.normal_font)
         label.pack(fill="x", pady=10)
 
+        hide_message_button = tk.Button(self, text="Secret Message",
+                           command=lambda: controller.show_frame("StartPage"))
+
+        hide_mp3_button = tk.Button(self, text="MP3",
+                           command=lambda: controller.show_frame("StartPage"))
+
         back_button = tk.Button(self, text="Back",
                            command=lambda: controller.show_frame("StartPage"))
+
+        hide_message_button.pack()
+        hide_mp3_button.pack()
         back_button.pack()
 
 
