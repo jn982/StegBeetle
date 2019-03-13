@@ -3,14 +3,18 @@ from tkinter import font  as tkfont # python 3
 import tkinter
 from tkinter import filedialog
 import os
+"""
+Change secret message to be dealt like file path
+"""
+
 
 class SampleApp(tk.Tk):
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
-        self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold")
-        self.normal_font = tkfont.Font(family='Helvetica', size=15, weight="bold")
+        self.title_font = tkfont.Font(family='Calibri', size=18, weight="bold")
+        self.normal_font = tkfont.Font(family='Calibri', size=15, weight="bold")
 
         self.title("StegBeetle")
         self.geometry("600x500")
@@ -24,7 +28,7 @@ class SampleApp(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (StartPage, Hide, Discover, HideSecretMessage_Message, HideSecretMessage_Dir): #Intiate containers
+        for F in (StartPage, Hide, Discover, HideSecretMessage_Message, HideSecretMessage_Dir, Hide_Confirmation): #Intiate containers
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -103,6 +107,8 @@ class Discover(tk.Frame):
 
 
 class HideSecretMessage_Message(tk.Frame):
+
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
@@ -112,8 +118,11 @@ class HideSecretMessage_Message(tk.Frame):
         secretMessage = tk.StringVar()
         entryLabel = tk.Label(self, textvariable=secretMessage)
         mEntry = tk.Entry(self, bd=4, relief='sunken', textvariable=secretMessage)
+        mEntry.bind('<Return>', self.)
+
         start_button = tk.Button(self, text="Start Steganography",
                            command=lambda: controller.show_frame("HideSecretMessage_Dir"))
+
         home_button = tk.Button(self, text="Home",
                            command=lambda: controller.show_frame("StartPage"))
 
@@ -130,28 +139,80 @@ class HideSecretMessage_Dir(tk.Frame):
         global filepath
         filepath = file_grabber()
 
-    def test(self):
-        print(filepath)
+    def updateLabel(self):
+        global filepath
+        self.labelCheck['text'] = filepath
 
 
     def __init__(self, parent, controller):
+
         tk.Frame.__init__(self, parent)
+
         self.controller = controller
 
-        labelTitle = tk.Label(self, text="Hide: Finding File", font=controller.title_font)
+        self.labelTitle = tk.Label(self, text="Hide: Finding File", font=controller.title_font)
 
-        labelSecret = tk.Label(self, text="Navigate to the file you would like to \n embed your message into", font=controller.normal_font)
+        self.labelSecret = tk.Label(self, text="Navigate to the file you would like to \n embed your message into", font=controller.normal_font)
+
+        self.labelCheck = tk.Label(self, text="No Current File Selected \nSelect Your File Then Click 'Update'", font=controller.normal_font)
 
         find_button = tk.Button(self, text="...",
                            command=self.find_file)
 
+        update_button = tk.Button(self, text="Update",
+                           command=self.updateLabel)
+
+        start_button = tk.Button(self, text="Start Steganography",
+                           command=lambda: controller.show_frame("Hide_Confirmation"))
+
         home_button = tk.Button(self, text="Home",
                            command=lambda: controller.show_frame("StartPage"))
 
-        labelTitle.pack(side="top", fill="x", pady=10)
-        labelSecret.pack(fill="x", pady=10)
+        self.labelTitle.pack(side="top", fill="x", pady=10)
+        self.labelSecret.pack(fill="x", pady=10)
         find_button.pack()
+        self.labelCheck.pack()
+        update_button.pack()
         home_button.pack(side="bottom", pady=10)
+        start_button.pack(side="bottom", pady=50)
+
+
+class Hide_Confirmation(tk.Frame):
+
+
+    def updateLabel(self):
+        global filepath
+        self.labelFilePath.config(text=filepath)
+
+    def __init__(self, parent, controller):
+        global filepath
+        tk.Frame.__init__(self, parent)
+
+
+        self.controller = controller
+
+        self.labelTitle = tk.Label(self, text="Hide: Confirmation", font=controller.title_font)
+        self.labelFilePathTitle = tk.Label(self, text="File Path You've Chosen", font=controller.normal_font)
+        self.labelFilePath = tk.Label(self, text=filepath, font=controller.normal_font)
+
+        self.labelSecretMessageTitle = tk.Label(self, text="Your Secret Message", font=controller.normal_font)
+        self.labelSecretMessage = tk.Label(self, text=secretMessage, font=controller.normal_font)
+
+        home_button = tk.Button(self, text="Home",
+                           command=lambda: controller.show_frame("StartPage"))
+
+        update_button = tk.Button(self, text="Click to load your choices",
+                           command=self.updateLabel)
+
+
+
+
+        self.labelTitle.pack(side="top", fill="x", pady=10)
+        self.labelFilePathTitle.pack()
+        self.labelFilePath.pack()
+        update_button.pack()
+        home_button.pack(side="bottom", pady=10)
+
 
 
 def file_grabber():
@@ -163,7 +224,8 @@ def file_grabber():
 
 
 
-filepath = "oo"
+filepath = "N/A"
+secret_Message = ""
 
 if __name__ == "__main__":
     app = SampleApp()
