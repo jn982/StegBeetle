@@ -108,7 +108,6 @@ class Discover(tk.Frame):
 
 class HideSecretMessage_Message(tk.Frame):
 
-
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
@@ -118,7 +117,6 @@ class HideSecretMessage_Message(tk.Frame):
         secretMessage = tk.StringVar()
         entryLabel = tk.Label(self, textvariable=secretMessage)
         mEntry = tk.Entry(self, bd=4, relief='sunken', textvariable=secretMessage)
-        mEntry.bind('<Return>', self.)
 
         start_button = tk.Button(self, text="Start Steganography",
                            command=lambda: controller.show_frame("HideSecretMessage_Dir"))
@@ -196,7 +194,7 @@ class Hide_Confirmation(tk.Frame):
         self.labelFilePath = tk.Label(self, text=filepath, font=controller.normal_font)
 
         self.labelSecretMessageTitle = tk.Label(self, text="Your Secret Message", font=controller.normal_font)
-        self.labelSecretMessage = tk.Label(self, text=secretMessage, font=controller.normal_font)
+        #self.labelSecretMessage = tk.Label(self, text=secretMessage, font=controller.normal_font)
 
         home_button = tk.Button(self, text="Home",
                            command=lambda: controller.show_frame("StartPage"))
@@ -225,7 +223,6 @@ def file_grabber():
 
 
 filepath = "N/A"
-secret_Message = ""
 
 if __name__ == "__main__":
     app = SampleApp()
