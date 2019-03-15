@@ -1,6 +1,6 @@
 # StegBeetle
 Uses:
-\nPython3.7
+Python3.7
 Python2.7
 <insert python libraries here>
 
