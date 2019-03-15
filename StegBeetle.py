@@ -3,7 +3,8 @@ from tkinter import font as tkfont  # python 3
 import tkinter
 from tkinter import filedialog
 import os
-
+import base64
+from shutil import copyfile
 from random import *
 from stegano import lsb
 from cryptosteganography import CryptoSteganography
@@ -31,7 +32,8 @@ class SampleApp(tk.Tk):
         self.frames = {}
         for F in (
         StartPage, Hide, Discover, HideSecretMessage_Message, HideSecretMessage_Input_File, HideSecretMessage_Ouput_Dir,
-        Hide_Confirmation, Hide_PNG_Key_or_No_Key, Something_Went_Wrong, Create_Success, Hide_PNG__With_Key):  # Intiate containers
+        Hide_Confirmation, Hide_PNG_Key_or_No_Key, Something_Went_Wrong, Create_Success, Hide_PNG__With_Key,
+        Hide_MP4_Encrypt_or_No_Encrypt, Hide_WEBM_Encrypt_or_No_Encrypt):  # Intiate containers
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -168,7 +170,10 @@ class HideSecretMessage_Input_File(tk.Frame):
     def find_file(self):
         global filepath
         filepath = file_grabber()
-        write_filepath(filepath)
+        try:
+            write_filepath(filepath)
+        except TypeError:
+            self.controller.show_frame("Something_Went_Wrong")
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -201,7 +206,10 @@ class HideSecretMessage_Ouput_Dir(tk.Frame):
     def find_file(self):
         global output_filepath
         output_filepath = dir_grabber()
-        write_output(output_filepath)
+        try:
+            write_output(output_filepath)
+        except TypeError:
+            self.controller.show_frame("Something_Went_Wrong")
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -243,6 +251,12 @@ class Hide_Confirmation(tk.Frame):
         global filepath
         if ".png" in filepath: #Stegano or cryptosteg depending on key or not
             self.controller.show_frame("Hide_PNG_Key_or_No_Key")
+
+        elif ".mp4" in filepath:
+            self.controller.show_frame("Hide_MP4_Encrypt_or_No_Encrypt")
+
+        elif ".webm" in filepath:
+            self.controller.show_frame("Hide_WEBM_Encrypt_or_No_Encrypt")
 
         else:
             self.controller.show_frame("Something_Went_Wrong")
@@ -362,6 +376,82 @@ class Hide_PNG__With_Key(tk.Frame):
         home_button.pack(side="bottom", pady=10)
 
 
+class Hide_MP4_Encrypt_or_No_Encrypt(tk.Frame):
+
+    def no_Encrypt(self):
+        global filepath, secret_message, output_filepath
+        video_append(filepath, secret_message, output_filepath, 'mp4')
+        self.controller.show_frame("Create_Success")
+
+    def with_Encrypt(self):
+        global filepath, secret_message, output_filepath
+        secret_message = encrypt_base64(secret_message)
+        video_append(filepath, secret_message, output_filepath, 'mp4')
+        self.controller.show_frame("Create_Success")
+
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="MP4 Detected", font=controller.title_font)
+        label.config(bg="light blue")
+        label.pack(side="top", fill="x", pady=10)
+
+        label = tk.Label(self, text="Would you like to encrypt the secret message?", font=controller.normal_font)
+        label.pack(side="top", fill="x", pady=10)
+
+        yes_key_button = tk.Button(self, text="Yes",
+                                command=self.with_Encrypt)
+        no_key_button = tk.Button(self, text="No",
+                                    command=self.no_Encrypt)
+
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+
+        yes_key_button.pack()
+        no_key_button.pack()
+        home_button.pack(side="bottom", pady=10)
+
+
+class Hide_WEBM_Encrypt_or_No_Encrypt(tk.Frame):
+
+    def no_Encrypt(self):
+        global filepath, secret_message, output_filepath
+        video_append(filepath, secret_message, output_filepath, 'webm')
+        self.controller.show_frame("Create_Success")
+
+    def with_Encrypt(self):
+        global filepath, secret_message, output_filepath
+        secret_message = encrypt_base64(secret_message)
+        video_append(filepath, secret_message, output_filepath, 'webm')
+        self.controller.show_frame("Create_Success")
+
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="WEBM Detected", font=controller.title_font)
+        label.config(bg="light blue")
+        label.pack(side="top", fill="x", pady=10)
+
+        label = tk.Label(self, text="Would you like to encrypt the secret message?", font=controller.normal_font)
+        label.pack(side="top", fill="x", pady=10)
+
+        yes_key_button = tk.Button(self, text="Yes",
+                                command=self.with_Encrypt)
+        no_key_button = tk.Button(self, text="No",
+                                    command=self.no_Encrypt)
+
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+
+        yes_key_button.pack()
+        no_key_button.pack()
+        home_button.pack(side="bottom", pady=10)
 
 
 def file_grabber():
@@ -450,6 +540,19 @@ def cryptosteganography(given_filepath, given_secret_message, given_secret_key, 
     crypto_steganography = CryptoSteganography(given_secret_key)
     crypto_steganography.hide(pure_filepath, pure_output_filepath, pure_secret)
 
+def video_append(given_filepath, given_secret_message, given_output_filepath, filetype):
+    pure_filepath = given_filepath[:-1] #takes away the \n added by the write function
+    pure_secret = given_secret_message[:-1]
+    pure_output_filepath = given_output_filepath[:-1] + '/stegged-'+filetype+'-image-'+str(randint(0,100000))+'.'+ filetype
+
+    copyfile(pure_filepath, pure_output_filepath)   #make a copy of the video
+    with open(pure_output_filepath, "a") as myfile:
+        myfile.write("{({({ " + pure_secret + " })})}") #append data to it
+
+def encrypt_base64(data):
+    base64_data = str(base64.b64encode(data.encode('ascii')))
+    return base64_data
+
 
 filepath = ""
 secret_message = ""
@@ -466,4 +569,5 @@ if __name__ == "__main__":
 WEAKNESS:
 Config File means not an independent program that doesn't do everything on its own. Advantage of using it: makes sharing info between scripts easy. Also allows users to come back to sessions, as their options are saved.
 Multiple scripts because python version differences means its not standalone. Advantage: means I can use python2 libraries, expanding usability. 
+Sometimes punctuation (and sometimes numbers) do not make it into the hidden message process.
 """
