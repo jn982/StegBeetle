@@ -1,5 +1,5 @@
 import tkinter as tk                # python 3
-from tkinter import font  as tkfont # python 3
+from tkinter import font as tkfont # python 3
 import tkinter
 from tkinter import filedialog
 import os
@@ -112,6 +112,7 @@ class HideSecretMessage_Message(tk.Frame):
         global secret_message
         secret_message = self.secretMessage.get()
         #print("updateSecret: "+secret_message)
+        write_secret(secret_message)
         self.controller.show_frame("HideSecretMessage_Input_File")
 
     def __init__(self, parent, controller):
@@ -142,11 +143,7 @@ class HideSecretMessage_Input_File(tk.Frame):
     def find_file(self):
         global filepath
         filepath = file_grabber()
-
-    #def updateLabel(self):
-    #    global filepath
-    #    self.labelCheck['text'] = filepath
-
+        write_filepath(filepath)
 
     def __init__(self, parent, controller):
 
@@ -158,12 +155,8 @@ class HideSecretMessage_Input_File(tk.Frame):
 
         self.labelSecret = tk.Label(self, text="Navigate to the file you would like to \n embed your message into", font=controller.normal_font)
 
-        #self.labelCheck = tk.Label(self, text="No Current File Selected \nSelect Your File Then Click 'Update'", font=controller.normal_font)
-
         find_button = tk.Button(self, text="...",
                            command=self.find_file)
-
-        #update_button = tk.Button(self, text="Update", command=self.updateLabel)
 
         start_button = tk.Button(self, text="Continue",
                            command=lambda: controller.show_frame("HideSecretMessage_Ouput_Dir"))
@@ -174,8 +167,6 @@ class HideSecretMessage_Input_File(tk.Frame):
         self.labelTitle.pack(side="top", fill="x", pady=10)
         self.labelSecret.pack(fill="x", pady=10)
         find_button.pack()
-        #self.labelCheck.pack()
-        #update_button.pack()
         home_button.pack(side="bottom", pady=10)
         start_button.pack(side="bottom", pady=100)
 
@@ -185,6 +176,7 @@ class HideSecretMessage_Ouput_Dir(tk.Frame):
     def find_file(self):
         global output_filepath
         output_filepath = dir_grabber()
+        write_output(output_filepath)
 
 
     def __init__(self, parent, controller):
@@ -214,9 +206,9 @@ class HideSecretMessage_Ouput_Dir(tk.Frame):
 
 class Hide_Confirmation(tk.Frame):
 
-
     def updateLabel(self):
-        global filepath, secret_message
+        global filepath, secret_message, output_filepath
+        #print(filepath)
         self.labelInputPath.config(text=filepath)
         self.labelFilePath.config(text=output_filepath)
         self.labelSecretMessage.config(text=secret_message)
@@ -247,7 +239,9 @@ class Hide_Confirmation(tk.Frame):
         update_button = tk.Button(self, text="Click to load your choices",
                            command=self.updateLabel)
 
-
+        self.labelSecretMessage.config(bg="light blue")
+        self.labelInputPath.config(bg="light yellow")
+        self.labelFilePath.config(bg="light green")
 
 
         self.labelTitle.pack(side="top", fill="x", pady=10)
@@ -256,7 +250,7 @@ class Hide_Confirmation(tk.Frame):
         self.labelInputPathTitle.pack(side="top", fill="x", pady=10)
         self.labelInputPath.pack(side="top", fill="x", pady=10)
         self.labelFilePathTitle.pack(side="top", fill="x", pady=10)
-        self.labelFilePath.pack(side="top", fill="x", pady=10)
+        self.labelFilePath.pack(side="top", fill="x", pady=10)\
 
         update_button.pack()
         home_button.pack(side="bottom", pady=10)
@@ -277,10 +271,70 @@ def dir_grabber():
     selected_dir = filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
     return selected_dir
 
+def config_loader():
+    global filepath, secret_message, output_filepath
+    with open('StegBeetle_config.txt') as config_file:
+        for i, line in enumerate(config_file):
+            if i == 0:# 1st line: filepath
+                filepath = line
+            elif i == 1:# 2nd line: secret_message
+                secret_message = line
+            elif i == 2: #3rd line: output_path
+                output_filepath = line
+
+def write_filepath(new_filepath):
+    with open('StegBeetle_config.txt', 'r') as config_file:
+        # read a list of lines into data
+        data = config_file.readlines()
+
+    # now change the 1st line, note that you have to add a newline
+    data[0] = new_filepath + '\n'
+
+    # and write everything back
+    with open('StegBeetle_config.txt', 'w') as file:
+        file.writelines(data)
+        #print(data)
+
+
+def write_secret(new_secret):
+    with open('StegBeetle_config.txt', 'r') as config_file:
+        # read a list of lines into data
+        data = config_file.readlines()
+
+    # now change the 2nd line, note that you have to add a newline
+    data[1] = new_secret + '\n'
+
+    # and write everything back
+    with open('StegBeetle_config.txt', 'w') as file:
+        file.writelines(data)
+        #print(data)
+
+def write_output(new_output):
+    with open('StegBeetle_config.txt', 'r') as config_file:
+        # read a list of lines into data
+        data = config_file.readlines()
+
+    # now change the 3rd line, note that you have to add a newline
+    data[2] = new_output + '\n'
+
+    # and write everything back
+    with open('StegBeetle_config.txt', 'w') as file:
+        file.writelines(data)
+        #print(data)
+
+
 filepath = ""
 secret_message = ""
 output_filepath = ""
 
 if __name__ == "__main__":
+    config_loader()
     app = SampleApp()
     app.mainloop()
+
+
+"""
+WEAKNESS:
+Config File means not an independent program that doesn't do everything on its own. Advantage of using it: makes sharing info between scripts easy. Also allows users to come back to sessions, as their options are saved.
+Multiple scripts because python version differences means its not standalone. Advantage: means I can use python2 libraries, expanding usability. 
+"""
