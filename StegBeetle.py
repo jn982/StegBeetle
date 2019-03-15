@@ -6,6 +6,7 @@ import os
 
 from random import *
 from stegano import lsb
+from cryptosteganography import CryptoSteganography
 
 
 class SampleApp(tk.Tk):
@@ -30,7 +31,7 @@ class SampleApp(tk.Tk):
         self.frames = {}
         for F in (
         StartPage, Hide, Discover, HideSecretMessage_Message, HideSecretMessage_Input_File, HideSecretMessage_Ouput_Dir,
-        Hide_Confirmation, Hide_PNG_Key_or_No_Key, Something_Went_Wrong, Create_Success):  # Intiate containers
+        Hide_Confirmation, Hide_PNG_Key_or_No_Key, Something_Went_Wrong, Create_Success, Hide_PNG__With_Key):  # Intiate containers
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -297,6 +298,10 @@ class Hide_PNG_Key_or_No_Key(tk.Frame):
         except AssertionError:
             self.controller.show_frame("Something_Went_Wrong")
 
+    def with_key(self):
+            self.controller.show_frame("Hide_PNG__With_Key")
+
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
@@ -308,7 +313,7 @@ class Hide_PNG_Key_or_No_Key(tk.Frame):
         label.pack(side="top", fill="x", pady=10)
 
         yes_key_button = tk.Button(self, text="Yes",
-                                command=lambda: controller.show_frame("Hide"))
+                                command=self.with_key)
         no_key_button = tk.Button(self, text="No",
                                     command=self.no_key)
 
@@ -320,6 +325,44 @@ class Hide_PNG_Key_or_No_Key(tk.Frame):
         yes_key_button.pack()
         no_key_button.pack()
         home_button.pack(side="bottom", pady=10)
+
+
+class Hide_PNG__With_Key(tk.Frame):
+
+    def updateSecret(self):
+        global filepath, secret_message, key, output_filepath
+        key = self.secretKey.get()
+        try:
+            cryptosteganography(filepath, secret_message, key, output_filepath)
+            self.controller.show_frame("Create_Success")
+        except AssertionError:
+            self.controller.show_frame("Something_Went_Wrong")
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        labelTitle = tk.Label(self, text="Hide: Secret Message", font=controller.title_font)
+
+        labelSecret = tk.Label(self, text="What is your key?", font=controller.normal_font)
+        self.secretKey = tk.StringVar()
+        entryLabel = tk.Label(self, textvariable=self.secretKey)
+        mEntry = tk.Entry(self, bd=4, relief='sunken', textvariable=self.secretKey)
+
+        start_button = tk.Button(self, text="Begin Steganography",
+                                 command=lambda: self.updateSecret())
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+        labelTitle.pack(side="top", fill="x", pady=10)
+        labelSecret.pack(fill="x", pady=10)
+        entryLabel.pack()
+        mEntry.pack()
+        start_button.pack()
+        home_button.pack(side="bottom", pady=10)
+
+
+
 
 def file_grabber():
     root = tkinter.Tk()
@@ -399,6 +442,13 @@ def stegano(given_filepath, given_secret_message, given_output_filepath):
     secret = lsb.hide(pure_filepath, pure_secret)
     secret.save(pure_output_filepath)
 
+def cryptosteganography(given_filepath, given_secret_message, given_secret_key, given_output_filepath):
+    pure_filepath = given_filepath[:-1] #takes away the \n added by the write function
+    pure_secret = given_secret_message[:-1]
+    pure_output_filepath = given_output_filepath[:-1] + '/stegged-png-image-'+str(randint(0,100000))+'.png'
+
+    crypto_steganography = CryptoSteganography(given_secret_key)
+    crypto_steganography.hide(pure_filepath, pure_output_filepath, pure_secret)
 
 
 filepath = ""
