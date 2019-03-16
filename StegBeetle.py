@@ -33,7 +33,7 @@ class SampleApp(tk.Tk):
         for F in (
         StartPage, Hide, Discover, HideSecretMessage_Message, HideSecretMessage_Input_File, HideSecretMessage_Ouput_Dir,
         Hide_Confirmation, Hide_PNG_Key_or_No_Key, Something_Went_Wrong, Create_Success, Hide_PNG__With_Key,
-        Hide_MP4_Encrypt_or_No_Encrypt, Hide_WEBM_Encrypt_or_No_Encrypt):  # Intiate containers
+        Hide_MP4_Encrypt_or_No_Encrypt, Hide_WEBM_Encrypt_or_No_Encrypt, Hide_JPG_Encrypt_or_No_Encrypt):  # Intiate containers
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -258,6 +258,12 @@ class Hide_Confirmation(tk.Frame):
         elif ".webm" in filepath:
             self.controller.show_frame("Hide_WEBM_Encrypt_or_No_Encrypt")
 
+        elif ".jpg" in filepath:
+            self.controller.show_frame("Hide_JPG_Encrypt_or_No_Encrypt")
+            self.controller.show_frame("Hide_JPG_Encrypt_or_No_Encrypt")
+            self.controller.show_frame("Hide_JPG_Encrypt_or_No_Encrypt")
+            self.controller.show_frame("Hide_JPG_Encrypt_or_No_Encrypt")
+
         else:
             self.controller.show_frame("Something_Went_Wrong")
 
@@ -456,6 +462,47 @@ class Hide_WEBM_Encrypt_or_No_Encrypt(tk.Frame):
         no_key_button.pack()
         home_button.pack(side="bottom", pady=10)
 
+
+
+class Hide_JPG_Encrypt_or_No_Encrypt(tk.Frame):
+
+    def no_Encrypt(self):
+        global filepath, secret_message, output_filepath
+        steg_dir = os.path.dirname(os.path.realpath(__file__))
+        steg_dir += '/bin_StegBeetle_jpg.py'
+        os.system("python2.7 " + steg_dir)
+        self.controller.show_frame("Create_Success")
+
+    def with_Encrypt(self):
+        global filepath, secret_message, output_filepath
+        secret_message = encrypt_base64(secret_message)
+        #CREATE METHOD
+        self.controller.show_frame("Create_Success")
+
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="JPG Detected", font=controller.title_font)
+        label.config(bg="light blue")
+        label.pack(side="top", fill="x", pady=10)
+
+        label = tk.Label(self, text="Would you like to encrypt the secret message?", font=controller.normal_font)
+        label.pack(side="top", fill="x", pady=10)
+
+        yes_key_button = tk.Button(self, text="Yes",
+                                command=self.with_Encrypt)
+        no_key_button = tk.Button(self, text="No",
+                                    command=self.no_Encrypt)
+
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+
+        yes_key_button.pack()
+        no_key_button.pack()
+        home_button.pack(side="bottom", pady=10)
 
 def file_grabber():
     root = tkinter.Tk()
