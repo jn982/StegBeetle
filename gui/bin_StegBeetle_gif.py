@@ -11,7 +11,7 @@ def config_loader():
             elif i == 1:  # 2nd line: secret_message
                 secret_message = purify(line)
             elif i == 2:  # 3rd line: output_path
-                output_filepath = purify(line) + '/stegged-jpg-image-'+str(randint(0,100000))+'.jpg'
+                output_filepath = purify(line) + '/stegged-jpg-image-'+str(randint(0,100000))+'.gif'
 
 def purify(data):
     if "\n" in data:
