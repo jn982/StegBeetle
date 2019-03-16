@@ -476,7 +476,10 @@ class Hide_JPG_Encrypt_or_No_Encrypt(tk.Frame):
     def with_Encrypt(self):
         global filepath, secret_message, output_filepath
         secret_message = encrypt_base64(secret_message)
-        #CREATE METHOD
+        write_secret(secret_message)
+        steg_dir = os.path.dirname(os.path.realpath(__file__))
+        steg_dir += '/bin_StegBeetle_jpg.py'
+        os.system("python2.7 " + steg_dir)
         self.controller.show_frame("Create_Success")
 
 
