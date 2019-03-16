@@ -312,6 +312,9 @@ class Hide_PNG_Key_or_No_Key(tk.Frame):
         except AssertionError:
             self.controller.show_frame("Something_Went_Wrong")
 
+        except FileNotFoundError:
+            self.controller.show_frame("Something_Went_Wrong")
+
     def with_key(self):
             self.controller.show_frame("Hide_PNG__With_Key")
 
@@ -475,11 +478,11 @@ def config_loader():
     with open('StegBeetle_config.txt') as config_file:
         for i, line in enumerate(config_file):
             if i == 0:  # 1st line: filepath
-                filepath = line
+                filepath = purify(line)
             elif i == 1:  # 2nd line: secret_message
-                secret_message = line
+                secret_message = purify(line)
             elif i == 2:  # 3rd line: output_path
-                output_filepath = line
+                output_filepath = purify(line)
 
 
 def write_filepath(new_filepath):
@@ -524,26 +527,25 @@ def write_output(new_output):
         # print(data)
 
 def stegano(given_filepath, given_secret_message, given_output_filepath):
-    pure_filepath = given_filepath[:-1] #takes away the \n added by the write function
-    pure_secret = given_secret_message[:-1]
-    pure_output_filepath = given_output_filepath[:-1] + '/stegged-png-image-'+str(randint(0,100000))+'.png'
-    #print(pure_filepath, pure_secret, pure_output_filepath)
+    pure_filepath = purify(given_filepath) #takes away the \n added by the write function
+    pure_secret = purify(given_secret_message)
+    pure_output_filepath = purify(given_output_filepath) + '/stegged-png-image-'+str(randint(0,100000))+'.png'
 
     secret = lsb.hide(pure_filepath, pure_secret)
     secret.save(pure_output_filepath)
 
 def cryptosteganography(given_filepath, given_secret_message, given_secret_key, given_output_filepath):
-    pure_filepath = given_filepath[:-1] #takes away the \n added by the write function
-    pure_secret = given_secret_message[:-1]
-    pure_output_filepath = given_output_filepath[:-1] + '/stegged-png-image-'+str(randint(0,100000))+'.png'
+    pure_filepath = purify(given_filepath) #takes away the \n added by the write function
+    pure_secret = purify(given_secret_message)
+    pure_output_filepath = purify(given_output_filepath) + '/stegged-png-image-'+str(randint(0,100000))+'.png'
 
     crypto_steganography = CryptoSteganography(given_secret_key)
     crypto_steganography.hide(pure_filepath, pure_output_filepath, pure_secret)
 
 def video_append(given_filepath, given_secret_message, given_output_filepath, filetype):
-    pure_filepath = given_filepath[:-1] #takes away the \n added by the write function
-    pure_secret = given_secret_message[:-1]
-    pure_output_filepath = given_output_filepath[:-1] + '/stegged-'+filetype+'-image-'+str(randint(0,100000))+'.'+ filetype
+    pure_filepath = purify(given_filepath) #takes away the \n added by the write function
+    pure_secret = purify(given_secret_message)
+    pure_output_filepath = purify(given_output_filepath) + '/stegged-'+filetype+'-image-'+str(randint(0,100000))+'.'+ filetype
 
     copyfile(pure_filepath, pure_output_filepath)   #make a copy of the video
     with open(pure_output_filepath, "a") as myfile:
@@ -553,6 +555,11 @@ def encrypt_base64(data):
     base64_data = str(base64.b64encode(data.encode('ascii')))
     return base64_data
 
+def purify(data):
+    if "\n" in data:
+        data = data[:-1]
+
+    return data
 
 filepath = ""
 secret_message = ""
