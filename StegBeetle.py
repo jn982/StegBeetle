@@ -33,7 +33,9 @@ class SampleApp(tk.Tk):
         for F in (
         StartPage, Hide, Discover, HideSecretMessage_Message, HideSecretMessage_Input_File, HideSecretMessage_Ouput_Dir,
         Hide_Confirmation, Hide_PNG_Key_or_No_Key, Something_Went_Wrong, Create_Success, Hide_PNG__With_Key,
-        Hide_MP4_Encrypt_or_No_Encrypt, Hide_WEBM_Encrypt_or_No_Encrypt, Hide_JPG_Encrypt_or_No_Encrypt):  # Intiate containers
+        Hide_MP4_Encrypt_or_No_Encrypt, Hide_WEBM_Encrypt_or_No_Encrypt, Hide_JPG_Encrypt_or_No_Encrypt,
+        Hide_BMP_Encrypt_or_No_Encrypt, Hide_GIF_Encrypt_or_No_Encrypt, HideSecretMessage_MP3_File, HideMP3_Input_File,
+        HideMP3_Ouput_Dir, HideMP3_Confirmation, Hide_MP3_Key_or_No_Key, Hide_MP3__With_Key):  # Intiate containers
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -110,7 +112,7 @@ class Hide(tk.Frame):
                                         command=lambda: controller.show_frame("HideSecretMessage_Message"))
 
         hide_mp3_button = tk.Button(self, text="MP3",
-                                    command=lambda: controller.show_frame("StartPage"))
+                                    command=lambda: controller.show_frame("HideSecretMessage_MP3_File"))
 
         home_button = tk.Button(self, text="Home",
                                 command=lambda: controller.show_frame("StartPage"))
@@ -182,7 +184,7 @@ class HideSecretMessage_Input_File(tk.Frame):
 
         self.labelTitle = tk.Label(self, text="Hide: Finding File", font=controller.title_font)
 
-        self.labelSecret = tk.Label(self, text="Navigate to the file you would like to \n embed your message into",
+        self.labelSecret = tk.Label(self, text="Navigate to the image you would like to \n embed your message into",
                                     font=controller.normal_font)
 
         find_button = tk.Button(self, text="...",
@@ -260,15 +262,18 @@ class Hide_Confirmation(tk.Frame):
 
         elif ".jpg" in filepath:
             self.controller.show_frame("Hide_JPG_Encrypt_or_No_Encrypt")
-            self.controller.show_frame("Hide_JPG_Encrypt_or_No_Encrypt")
-            self.controller.show_frame("Hide_JPG_Encrypt_or_No_Encrypt")
-            self.controller.show_frame("Hide_JPG_Encrypt_or_No_Encrypt")
+
+        elif ".bmp" in filepath:
+            self.controller.show_frame("Hide_BMP_Encrypt_or_No_Encrypt")
+
+        elif ".gif" in filepath:
+            self.controller.show_frame("Hide_GIF_Encrypt_or_No_Encrypt")
 
         else:
             self.controller.show_frame("Something_Went_Wrong")
 
     def __init__(self, parent, controller):
-        global filepath
+        global filepath, secret_message, output_filepath
         tk.Frame.__init__(self, parent)
 
         self.controller = controller
@@ -507,6 +512,319 @@ class Hide_JPG_Encrypt_or_No_Encrypt(tk.Frame):
         no_key_button.pack()
         home_button.pack(side="bottom", pady=10)
 
+class Hide_BMP_Encrypt_or_No_Encrypt(tk.Frame):
+
+    def no_Encrypt(self):
+        global filepath, secret_message, output_filepath
+        steg_dir = os.path.dirname(os.path.realpath(__file__))
+        steg_dir += '/bin_StegBeetle_bmp.py'
+        os.system("python2.7 " + steg_dir)
+        self.controller.show_frame("Create_Success")
+
+    def with_Encrypt(self):
+        global filepath, secret_message, output_filepath
+        secret_message = encrypt_base64(secret_message)
+        write_secret(secret_message)
+        steg_dir = os.path.dirname(os.path.realpath(__file__))
+        steg_dir += '/bin_StegBeetle_bmp.py'
+        os.system("python2.7 " + steg_dir)
+        self.controller.show_frame("Create_Success")
+
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="BMP Detected", font=controller.title_font)
+        label.config(bg="light blue")
+        label.pack(side="top", fill="x", pady=10)
+
+        label = tk.Label(self, text="Would you like to encrypt the secret message?", font=controller.normal_font)
+        label.pack(side="top", fill="x", pady=10)
+
+        yes_key_button = tk.Button(self, text="Yes",
+                                command=self.with_Encrypt)
+        no_key_button = tk.Button(self, text="No",
+                                    command=self.no_Encrypt)
+
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+
+        yes_key_button.pack()
+        no_key_button.pack()
+        home_button.pack(side="bottom", pady=10)
+
+class Hide_GIF_Encrypt_or_No_Encrypt(tk.Frame):
+
+    def no_Encrypt(self):
+        global filepath, secret_message, output_filepath
+        steg_dir = os.path.dirname(os.path.realpath(__file__))
+        steg_dir += '/bin_StegBeetle_gif.py'
+        os.system("python2.7 " + steg_dir)
+        self.controller.show_frame("Create_Success")
+
+    def with_Encrypt(self):
+        global filepath, secret_message, output_filepath
+        secret_message = encrypt_base64(secret_message)
+        write_secret(secret_message)
+        steg_dir = os.path.dirname(os.path.realpath(__file__))
+        steg_dir += '/bin_StegBeetle_gif.py'
+        os.system("python2.7 " + steg_dir)
+        self.controller.show_frame("Create_Success")
+
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="GIF Detected", font=controller.title_font)
+        label.config(bg="light blue")
+        label.pack(side="top", fill="x", pady=10)
+
+        label = tk.Label(self, text="Would you like to encrypt the secret message?", font=controller.normal_font)
+        label.pack(side="top", fill="x", pady=10)
+
+        yes_key_button = tk.Button(self, text="Yes",
+                                command=self.with_Encrypt)
+        no_key_button = tk.Button(self, text="No",
+                                    command=self.no_Encrypt)
+
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+
+        yes_key_button.pack()
+        no_key_button.pack()
+        home_button.pack(side="bottom", pady=10)
+
+class HideSecretMessage_MP3_File(tk.Frame):
+
+    def find_file(self):
+        global mp3
+        mp3 = file_grabber()
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        self.controller = controller
+
+        self.labelTitle = tk.Label(self, text="Hide MP3: Finding MP3", font=controller.title_font)
+
+        self.labelSecret = tk.Label(self, text="Navigate to the mp3 file you would like to hide",
+                                    font=controller.normal_font)
+
+        find_button = tk.Button(self, text="...",
+                                command=self.find_file)
+
+        start_button = tk.Button(self, text="Continue",
+                                 command=lambda: controller.show_frame("HideMP3_Input_File"))
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+        self.labelTitle.pack(side="top", fill="x", pady=10)
+        self.labelSecret.pack(fill="x", pady=10)
+        find_button.pack()
+        home_button.pack(side="bottom", pady=10)
+        start_button.pack(side="bottom", pady=100)
+
+class HideMP3_Input_File(tk.Frame):
+
+    def find_file(self):
+        global filepath
+        filepath = file_grabber()
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        self.controller = controller
+
+        self.labelTitle = tk.Label(self, text="Hide MP3: Finding File", font=controller.title_font)
+
+        self.labelSecret = tk.Label(self, text="Navigate to the PNG you would like to \n embed your MP3 into",
+                                    font=controller.normal_font)
+
+        find_button = tk.Button(self, text="...",
+                                command=self.find_file)
+
+        start_button = tk.Button(self, text="Continue",
+                                 command=lambda: controller.show_frame("HideMP3_Ouput_Dir"))
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+        self.labelTitle.pack(side="top", fill="x", pady=10)
+        self.labelSecret.pack(fill="x", pady=10)
+        find_button.pack()
+        home_button.pack(side="bottom", pady=10)
+        start_button.pack(side="bottom", pady=100)
+
+class HideMP3_Ouput_Dir(tk.Frame):
+
+    def find_file(self):
+        global output_filepath
+        output_filepath = dir_grabber()
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        self.controller = controller
+
+        self.labelTitle = tk.Label(self, text="Hide: Output File", font=controller.title_font)
+
+        self.labelSecret = tk.Label(self, text="Navigate to the file you would like \n to store your stegged picture",
+                                    font=controller.normal_font)
+
+        find_button = tk.Button(self, text="...",
+                                command=self.find_file)
+
+        start_button = tk.Button(self, text="Start Steganography",
+                                 command=lambda: controller.show_frame("HideMP3_Confirmation"))
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+        self.labelTitle.pack(side="top", fill="x", pady=10)
+        self.labelSecret.pack(fill="x", pady=10)
+        find_button.pack()
+        home_button.pack(side="bottom", pady=10)
+        start_button.pack(side="bottom", pady=100)
+
+class HideMP3_Confirmation(tk.Frame):
+
+    def updateLabel(self):
+        global filepath, mp3, output_filepath
+        self.labelInputPath.config(text=filepath)
+        self.labelFilePath.config(text=output_filepath)
+        self.labelSecretMessage.config(text=mp3)
+        # print(secret_message)
+
+    def load_correct_process(self): #This is what will dynamically load the correct method of steganography
+        global filepath
+        if ".png" in filepath:
+            #method - ask key or no
+            self.controller.show_frame("Hide_MP3_Key_or_No_Key")
+        else:
+            self.controller.show_frame("Something_Went_Wrong")
+
+    def __init__(self, parent, controller):
+        global filepath, mp3, output_filepath
+        tk.Frame.__init__(self, parent)
+
+        self.controller = controller
+
+        self.labelTitle = tk.Label(self, text="Hide: Confirmation", font=controller.title_font)
+
+        self.labelSecretMessageTitle = tk.Label(self, text="Your Secret MP3", font=controller.normal_font)
+        self.labelSecretMessage = tk.Label(self, text=mp3, font=controller.normal_font)
+
+        self.labelInputPathTitle = tk.Label(self, text="Input You've Chosen", font=controller.normal_font)
+        self.labelInputPath = tk.Label(self, text=filepath, font=controller.normal_font)
+
+        self.labelFilePathTitle = tk.Label(self, text="Output File You've Chosen", font=controller.normal_font)
+        self.labelFilePath = tk.Label(self, text=output_filepath, font=controller.normal_font)
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+        update_button = tk.Button(self, text="Click to load your choices",
+                                  command=self.updateLabel)
+
+        proceed_button = tk.Button(self, text="Proceed To Steg",
+                                   command=self.load_correct_process)
+
+        self.labelSecretMessage.config(bg="light blue")
+        self.labelInputPath.config(bg="light yellow")
+        self.labelFilePath.config(bg="light green")
+
+        self.labelTitle.pack(side="top", fill="x", pady=5)
+        self.labelSecretMessageTitle.pack(side="top", fill="x", pady=5)
+        self.labelSecretMessage.pack(side="top", fill="x", pady=5)
+        self.labelInputPathTitle.pack(side="top", fill="x", pady=5)
+        self.labelInputPath.pack(side="top", fill="x", pady=5)
+        self.labelFilePathTitle.pack(side="top", fill="x", pady=5)
+        self.labelFilePath.pack(side="top", fill="x", pady=5)
+        update_button.pack(side="top", pady=5)
+        proceed_button.pack(side="top", pady=5)
+        home_button.pack(side="bottom", pady=10)
+
+class Hide_MP3_Key_or_No_Key(tk.Frame):
+
+    def no_key(self):
+        global filepath, mp3, key, output_filepath
+        try:
+            cryptosteganography_mp3(filepath, mp3, key, output_filepath)
+            self.controller.show_frame("Create_Success")
+        except AssertionError:
+            self.controller.show_frame("Something_Went_Wrong")
+
+        except FileNotFoundError:
+            self.controller.show_frame("Something_Went_Wrong")
+
+    def with_key(self):
+            self.controller.show_frame("Hide_MP3__With_Key")
+
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="Hide: MP3", font=controller.title_font)
+        label.config(bg="light blue")
+        label.pack(side="top", fill="x", pady=10)
+
+        label = tk.Label(self, text="Would you like to use a key?", font=controller.normal_font)
+        label.pack(side="top", fill="x", pady=10)
+
+        yes_key_button = tk.Button(self, text="Yes",
+                                command=self.with_key)
+        no_key_button = tk.Button(self, text="No",
+                                    command=self.no_key)
+
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+
+        yes_key_button.pack()
+        no_key_button.pack()
+        home_button.pack(side="bottom", pady=10)
+
+
+class Hide_MP3__With_Key(tk.Frame):
+
+    def updateSecret(self):
+        global filepath, mp3, key, output_filepath
+        key = self.secretKey.get()
+        try:
+            cryptosteganography(filepath, mp3, key, output_filepath)
+            self.controller.show_frame("Create_Success")
+        except AssertionError:
+            self.controller.show_frame("Something_Went_Wrong")
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        labelTitle = tk.Label(self, text="Hide: MP3", font=controller.title_font)
+
+        labelSecret = tk.Label(self, text="What is your key?", font=controller.normal_font)
+        self.secretKey = tk.StringVar()
+        entryLabel = tk.Label(self, textvariable=self.secretKey)
+        mEntry = tk.Entry(self, bd=4, relief='sunken', textvariable=self.secretKey)
+
+        start_button = tk.Button(self, text="Begin Steganography",
+                                 command=lambda: self.updateSecret())
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+        labelTitle.pack(side="top", fill="x", pady=10)
+        labelSecret.pack(fill="x", pady=10)
+        entryLabel.pack()
+        mEntry.pack()
+        start_button.pack()
+        home_button.pack(side="bottom", pady=10)
+
 def file_grabber():
     root = tkinter.Tk()
     root.withdraw()
@@ -611,10 +929,18 @@ def purify(data):
 
     return data
 
+def cryptosteganography_mp3(given_filepath, given_secret_mp3, given_secret_key, given_output_filepath):
+    pure_filepath = purify(given_filepath) #takes away the \n added by the write function
+    pure_output_filepath = purify(given_output_filepath) + '/stegged-png-image-'+str(randint(0,100000))+'.png'
+
+    crypto_steganography = CryptoSteganography(given_secret_key)
+    crypto_steganography.hide(pure_filepath, pure_output_filepath, given_secret_mp3)
+
+
 filepath = ""
 secret_message = ""
 output_filepath = ""
-
+mp3 = ""
 key = ""
 
 if __name__ == "__main__":
