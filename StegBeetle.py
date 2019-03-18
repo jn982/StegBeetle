@@ -31,11 +31,12 @@ class SampleApp(tk.Tk):
 
         self.frames = {}
         for F in (
-        StartPage, Hide, Discover, HideSecretMessage_Message, HideSecretMessage_Input_File, HideSecretMessage_Ouput_Dir,
+        StartPage, Hide, HideSecretMessage_Message, HideSecretMessage_Input_File, HideSecretMessage_Ouput_Dir,
         Hide_Confirmation, Hide_PNG_Key_or_No_Key, Something_Went_Wrong, Create_Success, Hide_PNG__With_Key,
         Hide_MP4_Encrypt_or_No_Encrypt, Hide_WEBM_Encrypt_or_No_Encrypt, Hide_JPG_Encrypt_or_No_Encrypt,
         Hide_BMP_Encrypt_or_No_Encrypt, Hide_GIF_Encrypt_or_No_Encrypt, HideSecretMessage_MP3_File, HideMP3_Input_File,
-        HideMP3_Ouput_Dir, HideMP3_Confirmation, Hide_MP3_Key_or_No_Key, Hide_MP3__With_Key):  # Intiate containers
+        HideMP3_Ouput_Dir, HideMP3_Confirmation, Hide_MP3_Key_or_No_Key, Hide_MP3_With_Key, Discover_Input_File,
+        Discover_Ouput_Dir, Discover_Confirmation, Discover_PNG_MP3_Detected, Discover_PNG_Key_Detected):  # Intiate containers
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -91,7 +92,7 @@ class StartPage(tk.Frame):
         hide_button = tk.Button(self, text="Hide",
                                 command=lambda: controller.show_frame("Hide"))
         discover_button = tk.Button(self, text="Discover",
-                                    command=lambda: controller.show_frame("Discover"))
+                                    command=lambda: controller.show_frame("Discover_Input_File"))
 
         hide_button.pack()
         discover_button.pack()
@@ -119,18 +120,6 @@ class Hide(tk.Frame):
 
         hide_message_button.pack()
         hide_mp3_button.pack()
-        home_button.pack(side="bottom", pady=10)
-
-
-class Discover(tk.Frame):
-
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-        label = tk.Label(self, text="Discover", font=controller.title_font)
-        label.pack(side="top", fill="x", pady=10)
-        home_button = tk.Button(self, text="Home",
-                                command=lambda: controller.show_frame("StartPage"))
         home_button.pack(side="bottom", pady=10)
 
 
@@ -573,7 +562,6 @@ class Hide_GIF_Encrypt_or_No_Encrypt(tk.Frame):
         os.system("python2.7 " + steg_dir)
         self.controller.show_frame("Create_Success")
 
-
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
@@ -592,7 +580,6 @@ class Hide_GIF_Encrypt_or_No_Encrypt(tk.Frame):
 
         home_button = tk.Button(self, text="Home",
                                 command=lambda: controller.show_frame("StartPage"))
-
 
         yes_key_button.pack()
         no_key_button.pack()
@@ -703,7 +690,7 @@ class HideMP3_Confirmation(tk.Frame):
     def load_correct_process(self): #This is what will dynamically load the correct method of steganography
         global filepath
         if ".png" in filepath:
-            #method - ask key or no
+            #ask key or no
             self.controller.show_frame("Hide_MP3_Key_or_No_Key")
         else:
             self.controller.show_frame("Something_Went_Wrong")
@@ -763,7 +750,7 @@ class Hide_MP3_Key_or_No_Key(tk.Frame):
             self.controller.show_frame("Something_Went_Wrong")
 
     def with_key(self):
-            self.controller.show_frame("Hide_MP3__With_Key")
+            self.controller.show_frame("Hide_MP3_With_Key")
 
 
     def __init__(self, parent, controller):
@@ -791,13 +778,13 @@ class Hide_MP3_Key_or_No_Key(tk.Frame):
         home_button.pack(side="bottom", pady=10)
 
 
-class Hide_MP3__With_Key(tk.Frame):
+class Hide_MP3_With_Key(tk.Frame):
 
     def updateSecret(self):
         global filepath, mp3, key, output_filepath
         key = self.secretKey.get()
         try:
-            cryptosteganography(filepath, mp3, key, output_filepath)
+            cryptosteganography_mp3(filepath, mp3, key, output_filepath)
             self.controller.show_frame("Create_Success")
         except AssertionError:
             self.controller.show_frame("Something_Went_Wrong")
@@ -824,6 +811,230 @@ class Hide_MP3__With_Key(tk.Frame):
         mEntry.pack()
         start_button.pack()
         home_button.pack(side="bottom", pady=10)
+
+class Discover_Input_File(tk.Frame):
+
+    def find_file(self):
+        global filepath
+        filepath = file_grabber()
+        try:
+            write_filepath(filepath)
+        except TypeError:
+            self.controller.show_frame("Something_Went_Wrong")
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        self.controller = controller
+
+        self.labelTitle = tk.Label(self, text="Discover: Finding File", font=controller.title_font)
+
+        self.labelSecret = tk.Label(self, text="Navigate to the image you would like to look into",
+                                    font=controller.normal_font)
+
+        find_button = tk.Button(self, text="...",
+                                command=self.find_file)
+
+        start_button = tk.Button(self, text="Continue",
+                                 command=lambda: controller.show_frame("Discover_Ouput_Dir"))
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+        self.labelTitle.pack(side="top", fill="x", pady=10)
+        self.labelSecret.pack(fill="x", pady=10)
+        find_button.pack()
+        home_button.pack(side="bottom", pady=10)
+        start_button.pack(side="bottom", pady=100)
+
+class Discover_Ouput_Dir(tk.Frame):
+
+    def find_file(self):
+        global output_filepath
+        output_filepath = dir_grabber()
+        try:
+            write_output(output_filepath)
+        except TypeError:
+            self.controller.show_frame("Something_Went_Wrong")
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        self.controller = controller
+
+        self.labelTitle = tk.Label(self, text="Discover: Output File", font=controller.title_font)
+
+        self.labelSecret = tk.Label(self, text="Navigate to the file you would like \n to store your de-stegged information",
+                                    font=controller.normal_font)
+
+        find_button = tk.Button(self, text="...",
+                                command=self.find_file)
+
+        start_button = tk.Button(self, text="Start Discovery",
+                                 command=lambda: controller.show_frame("Discover_Confirmation"))
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+        self.labelTitle.pack(side="top", fill="x", pady=10)
+        self.labelSecret.pack(fill="x", pady=10)
+        find_button.pack()
+        home_button.pack(side="bottom", pady=10)
+        start_button.pack(side="bottom", pady=100)
+
+class Discover_Confirmation(tk.Frame):
+
+    def updateLabel(self):
+        global filepath, output_filepath
+        # print(filepath)
+        self.labelInputPath.config(text=filepath)
+        self.labelFilePath.config(text=output_filepath)
+        # print(secret_message)
+
+    def load_correct_process(self): #This is what will dynamically load the correct method of desteg
+        global filepath
+        if ".png" in filepath:
+            #Autodetect if key
+            detected = PNG_autodetect()
+            if detected == "key":
+                self.controller.show_frame("Discover_PNG_Key_Detected")
+
+            else:
+                mp3_detect = detect_mp3()
+                if mp3_detect == "True":
+                    self.controller.show_frame("Discover_PNG_MP3_Detected")
+                else:
+                    png_desteg()
+                    self.controller.show_frame("Create_Success")
+
+        elif ".mp4" in filepath:
+            video_discover()
+            self.controller.show_frame("Create_Success")
+
+        elif ".webm" in filepath:
+            video_discover()
+            self.controller.show_frame("Create_Success")
+
+        elif ".jpg" in filepath:
+            stegano_discover()
+            self.controller.show_frame("Create_Success")
+
+        elif ".bmp" in filepath:
+            stegano_discover()
+            self.controller.show_frame("Create_Success")
+
+        elif ".gif" in filepath:
+            stegano_discover()
+            self.controller.show_frame("Create_Success")
+
+        else:
+            self.controller.show_frame("Something_Went_Wrong")
+
+    def __init__(self, parent, controller):
+        global filepath, output_filepath
+        tk.Frame.__init__(self, parent)
+
+        self.controller = controller
+
+        self.labelTitle = tk.Label(self, text="Hide: Confirmation", font=controller.title_font)
+
+        self.labelInputPathTitle = tk.Label(self, text="Input You've Chosen", font=controller.normal_font)
+        self.labelInputPath = tk.Label(self, text=filepath, font=controller.normal_font)
+
+        self.labelFilePathTitle = tk.Label(self, text="Output File You've Chosen", font=controller.normal_font)
+        self.labelFilePath = tk.Label(self, text=output_filepath, font=controller.normal_font)
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+        update_button = tk.Button(self, text="Click to load your choices",
+                                  command=self.updateLabel)
+
+        proceed_button = tk.Button(self, text="Proceed To Discover",
+                                   command=self.load_correct_process)
+
+        self.labelInputPath.config(bg="light yellow")
+        self.labelFilePath.config(bg="light green")
+
+        self.labelTitle.pack(side="top", fill="x", pady=5)
+        self.labelInputPathTitle.pack(side="top", fill="x", pady=5)
+        self.labelInputPath.pack(side="top", fill="x", pady=5)
+        self.labelFilePathTitle.pack(side="top", fill="x", pady=5)
+        self.labelFilePath.pack(side="top", fill="x", pady=5)
+        update_button.pack(side="top", pady=5)
+        proceed_button.pack(side="top", pady=5)
+        home_button.pack(side="bottom", pady=10)
+
+class Discover_PNG_Key_Detected(tk.Frame):
+
+    def updateSecret(self):
+        global filepath, mp3, key, output_filepath
+        key = self.secretKey.get()
+        mp3_detect = detect_mp3()
+        if mp3_detect == "False":
+            try:
+                crypto_steganography = CryptoSteganography(key)
+                check = crypto_steganography.retrieve(filepath)
+                if not check: #wrong key
+                    self.controller.show_frame("Something_Went_Wrong")
+                else:
+                    png_desteg_key()
+                    self.controller.show_frame("Create_Success")
+            except AssertionError:
+                self.controller.show_frame("Something_Went_Wrong")
+            except TypeError:
+                self.controller.show_frame("Something_Went_Wrong")
+        else:
+            self.controller.show_frame("Discover_PNG_MP3_Detected")
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        labelTitle = tk.Label(self, text="Discover PNG: KEY DETECTED", font=controller.title_font)
+
+        labelSecret = tk.Label(self, text="What is the key?", font=controller.normal_font)
+        self.secretKey = tk.StringVar()
+        entryLabel = tk.Label(self, textvariable=self.secretKey)
+        mEntry = tk.Entry(self, bd=4, relief='sunken', textvariable=self.secretKey)
+
+        start_button = tk.Button(self, text="Discover",
+                                 command=lambda: self.updateSecret())
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+        labelTitle.pack(side="top", fill="x", pady=10)
+        labelSecret.pack(fill="x", pady=10)
+        entryLabel.pack()
+        mEntry.pack()
+        start_button.pack()
+        home_button.pack(side="bottom", pady=10)
+
+class Discover_PNG_MP3_Detected(tk.Frame):
+
+    def output_mp3(self):
+        global filepath, output_filepath
+        crypto_steganography = CryptoSteganography(key)
+        decrypted_mp3 = crypto_steganography.retrieve(filepath)
+        # read as an mp3
+        with open(output_filepath + "/destegged-mp3-output.mp3", 'wb') as write_mp3:
+            write_mp3.write(decrypted_mp3)
+
+        self.controller.show_frame("Create_Success")
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="Discover: MP3 DETECTED", font=controller.title_font)
+        label.pack(side="top", fill="x", pady=10)
+
+        output_mp3_button = tk.Button(self, text="Output as MP3",
+                                command=self.output_mp3)
+
+
+        output_mp3_button.pack()
+
+
 
 def file_grabber():
     root = tkinter.Tk()
@@ -906,7 +1117,7 @@ def cryptosteganography(given_filepath, given_secret_message, given_secret_key, 
     pure_filepath = purify(given_filepath) #takes away the \n added by the write function
     pure_secret = purify(given_secret_message)
     pure_output_filepath = purify(given_output_filepath) + '/stegged-png-image-'+str(randint(0,100000))+'.png'
-
+    #print(pure_filepath, given_secret_message, given_secret_key, given_output_filepath)
     crypto_steganography = CryptoSteganography(given_secret_key)
     crypto_steganography.hide(pure_filepath, pure_output_filepath, pure_secret)
 
@@ -932,9 +1143,67 @@ def purify(data):
 def cryptosteganography_mp3(given_filepath, given_secret_mp3, given_secret_key, given_output_filepath):
     pure_filepath = purify(given_filepath) #takes away the \n added by the write function
     pure_output_filepath = purify(given_output_filepath) + '/stegged-png-image-'+str(randint(0,100000))+'.png'
-
     crypto_steganography = CryptoSteganography(given_secret_key)
-    crypto_steganography.hide(pure_filepath, pure_output_filepath, given_secret_mp3)
+
+    with open(given_secret_mp3, "rb") as f: #filepath = jpg, mp3 = mp3 path
+        write_data = f.read()
+
+    crypto_steganography.hide(pure_filepath, pure_output_filepath, write_data)
+
+def PNG_autodetect():
+    global filepath
+    crypto_steganography = CryptoSteganography("")
+    secret = crypto_steganography.retrieve(filepath)
+    #print(type(secret_message))
+
+    if not secret:
+        secret = "key"
+        #print("there is a key")
+
+    else:
+        secret = "False"
+        print("no key")
+
+
+    return secret
+
+def png_desteg():
+    crypto_steganography = CryptoSteganography("")
+    write_data = crypto_steganography.retrieve(filepath)
+
+    with open(output_filepath+'/StegBeetle_Discovered_Informaton.txt', 'w') as discover_info:
+        discover_info.write(write_data)
+
+def png_desteg_key():
+    crypto_steganography = CryptoSteganography(key)
+    write_data = str(crypto_steganography.retrieve(filepath))
+
+    with open(output_filepath+'/StegBeetle_Discovered_Informaton.txt', 'w') as discover_info:
+        discover_info.write(write_data)
+
+def detect_mp3():
+    crypto_steganography = CryptoSteganography(key)
+    write_data = crypto_steganography.retrieve(filepath)
+    detected = ""
+    if type(write_data) == bytes:
+        detected = "True"
+        #print("mp3 caugtht")
+    else:
+        detected = "False"
+
+
+    return detected
+
+def video_discover():
+    write_data = os.popen("strings " + filepath).read()
+
+    with open(output_filepath+'/StegBeetle_Discovered_Informaton.txt', 'w') as discover_info:
+        discover_info.write(write_data)
+
+def stegano_discover():
+    steg_dir = os.path.dirname(os.path.realpath(__file__))
+    steg_dir += '/bin_StegBeetle_discover.py'
+    os.system("python2.7 " + steg_dir)
 
 
 filepath = ""
@@ -949,6 +1218,11 @@ if __name__ == "__main__":
     app.mainloop()
 
 """
+Worth mentioning
+STRENGTH:
+Auto detect keys
+Validation
+
 WEAKNESS:
 Config File means not an independent program that doesn't do everything on its own. Advantage of using it: makes sharing info between scripts easy. Also allows users to come back to sessions, as their options are saved.
 Multiple scripts because python version differences means its not standalone. Advantage: means I can use python2 libraries, expanding usability. 
