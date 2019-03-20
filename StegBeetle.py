@@ -894,11 +894,17 @@ class Discover_Confirmation(tk.Frame):
     def load_correct_process(self): #This is what will dynamically load the correct method of desteg
         global filepath
         if ".png" in filepath:
+            #stegano()
+            #self.controller.show_frame("Create_Success")
             #Autodetect if key
             detected = PNG_autodetect()
+            #print(detected)
             if detected == "key":
                 self.controller.show_frame("Discover_PNG_Key_Detected")
 
+            elif detected == "stegano_no_key":
+                stegano_discover()
+                self.controller.show_frame("Create_Success")
             else:
                 mp3_detect = detect_mp3()
                 if mp3_detect == "True":
@@ -906,6 +912,7 @@ class Discover_Confirmation(tk.Frame):
                 else:
                     png_desteg()
                     self.controller.show_frame("Create_Success")
+
 
         elif ".mp4" in filepath:
             video_discover()
@@ -916,15 +923,15 @@ class Discover_Confirmation(tk.Frame):
             self.controller.show_frame("Create_Success")
 
         elif ".jpg" in filepath:
-            stegano_discover()
+            steganography_discover()
             self.controller.show_frame("Create_Success")
 
         elif ".bmp" in filepath:
-            stegano_discover()
+            steganography_discover()
             self.controller.show_frame("Create_Success")
 
         elif ".gif" in filepath:
-            stegano_discover()
+            steganography_discover()
             self.controller.show_frame("Create_Success")
 
         else:
@@ -936,7 +943,7 @@ class Discover_Confirmation(tk.Frame):
 
         self.controller = controller
 
-        self.labelTitle = tk.Label(self, text="Hide: Confirmation", font=controller.title_font)
+        self.labelTitle = tk.Label(self, text="Discover: Confirmation", font=controller.title_font)
 
         self.labelInputPathTitle = tk.Label(self, text="Input You've Chosen", font=controller.normal_font)
         self.labelInputPath = tk.Label(self, text=filepath, font=controller.normal_font)
@@ -1152,20 +1159,31 @@ def cryptosteganography_mp3(given_filepath, given_secret_mp3, given_secret_key, 
 
 def PNG_autodetect():
     global filepath
-    crypto_steganography = CryptoSteganography("")
-    secret = crypto_steganography.retrieve(filepath)
-    #print(type(secret_message))
+    secret = ""
+    try:
+        crypto_steganography = CryptoSteganography("")
+        secret = crypto_steganography.retrieve(filepath)
+        #print(type(secret_message))
 
-    if not secret:
-        secret = "key"
-        #print("there is a key")
+        if not secret:
+            secret = "key"
+            #print("there is a key")
 
-    else:
-        secret = "False"
-        print("no key")
-
+        else:
+            secret = "False"
+            print("no key")
+    except:
+        secret = "stegano_no_key"
 
     return secret
+
+def stegano_discover():
+    write_data = lsb.reveal(filepath)
+    #print(type(write_data))
+
+    with open(output_filepath+'/StegBeetle_Discovered_Informaton.txt', 'w') as discover_info:
+        discover_info.write(write_data)
+
 
 def png_desteg():
     crypto_steganography = CryptoSteganography("")
@@ -1200,7 +1218,7 @@ def video_discover():
     with open(output_filepath+'/StegBeetle_Discovered_Informaton.txt', 'w') as discover_info:
         discover_info.write(write_data)
 
-def stegano_discover():
+def steganography_discover():
     steg_dir = os.path.dirname(os.path.realpath(__file__))
     steg_dir += '/bin_StegBeetle_discover.py'
     os.system("python2.7 " + steg_dir)
