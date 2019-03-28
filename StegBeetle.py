@@ -400,7 +400,7 @@ class Hide_MP4_Encrypt_or_No_Encrypt(tk.Frame):
         label.config(bg="light blue")
         label.pack(side="top", fill="x", pady=10)
 
-        label = tk.Label(self, text="Would you like to encrypt the secret message?", font=controller.normal_font)
+        label = tk.Label(self, text="Would you like to encode the secret message?", font=controller.normal_font)
         label.pack(side="top", fill="x", pady=10)
 
         yes_key_button = tk.Button(self, text="Yes",
@@ -439,7 +439,7 @@ class Hide_WEBM_Encrypt_or_No_Encrypt(tk.Frame):
         label.config(bg="light blue")
         label.pack(side="top", fill="x", pady=10)
 
-        label = tk.Label(self, text="Would you like to encrypt the secret message?", font=controller.normal_font)
+        label = tk.Label(self, text="Would you like to encode the secret message?", font=controller.normal_font)
         label.pack(side="top", fill="x", pady=10)
 
         yes_key_button = tk.Button(self, text="Yes",
@@ -484,7 +484,7 @@ class Hide_JPG_Encrypt_or_No_Encrypt(tk.Frame):
         label.config(bg="light blue")
         label.pack(side="top", fill="x", pady=10)
 
-        label = tk.Label(self, text="Would you like to encrypt the secret message?", font=controller.normal_font)
+        label = tk.Label(self, text="Would you like to encode the secret message?", font=controller.normal_font)
         label.pack(side="top", fill="x", pady=10)
 
         yes_key_button = tk.Button(self, text="Yes",
@@ -527,7 +527,7 @@ class Hide_BMP_Encrypt_or_No_Encrypt(tk.Frame):
         label.config(bg="light blue")
         label.pack(side="top", fill="x", pady=10)
 
-        label = tk.Label(self, text="Would you like to encrypt the secret message?", font=controller.normal_font)
+        label = tk.Label(self, text="Would you like to encode the secret message?", font=controller.normal_font)
         label.pack(side="top", fill="x", pady=10)
 
         yes_key_button = tk.Button(self, text="Yes",
@@ -569,7 +569,7 @@ class Hide_GIF_Encrypt_or_No_Encrypt(tk.Frame):
         label.config(bg="light blue")
         label.pack(side="top", fill="x", pady=10)
 
-        label = tk.Label(self, text="Would you like to encrypt the secret message?", font=controller.normal_font)
+        label = tk.Label(self, text="Would you like to encode the secret message?", font=controller.normal_font)
         label.pack(side="top", fill="x", pady=10)
 
         yes_key_button = tk.Button(self, text="Yes",
