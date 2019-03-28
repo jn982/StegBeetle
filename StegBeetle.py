@@ -249,7 +249,7 @@ class Hide_Confirmation(tk.Frame):
         elif ".webm" in filepath:
             self.controller.show_frame("Hide_WEBM_Encrypt_or_No_Encrypt")
 
-        elif ".jpg" in filepath:
+        elif (".jpg" in filepath) or (".jpeg" in filepath):
             self.controller.show_frame("Hide_JPG_Encrypt_or_No_Encrypt")
 
         elif ".bmp" in filepath:
@@ -922,7 +922,7 @@ class Discover_Confirmation(tk.Frame):
             video_discover()
             self.controller.show_frame("Create_Success")
 
-        elif ".jpg" in filepath:
+        elif (".jpg" in filepath) or (".jpeg" in filepath):
             steganography_discover()
             self.controller.show_frame("Create_Success")
 
