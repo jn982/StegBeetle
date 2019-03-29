@@ -36,7 +36,8 @@ class SampleApp(tk.Tk):
         Hide_MP4_Encrypt_or_No_Encrypt, Hide_WEBM_Encrypt_or_No_Encrypt, Hide_JPG_Encrypt_or_No_Encrypt,
         Hide_BMP_Encrypt_or_No_Encrypt, Hide_GIF_Encrypt_or_No_Encrypt, HideSecretMessage_MP3_File, HideMP3_Input_File,
         HideMP3_Ouput_Dir, HideMP3_Confirmation, Hide_MP3_Key_or_No_Key, Hide_MP3_With_Key, Discover_Input_File,
-        Discover_Ouput_Dir, Discover_Confirmation, Discover_PNG_MP3_Detected, Discover_PNG_Key_Detected):  # Intiate containers
+        Discover_Ouput_Dir, Discover_Confirmation, Discover_PNG_MP3_Detected, Discover_PNG_Key_Detected,
+        key_possibly_detected):  # Intiate containers
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -894,13 +895,9 @@ class Discover_Confirmation(tk.Frame):
     def load_correct_process(self): #This is what will dynamically load the correct method of desteg
         global filepath
         if ".png" in filepath:
-            #stegano()
-            #self.controller.show_frame("Create_Success")
-            #Autodetect if key
             detected = PNG_autodetect()
-            #print(detected)
-            if detected == "key":
-                self.controller.show_frame("Discover_PNG_Key_Detected")
+            if detected == "maybe_key":
+                self.controller.show_frame("key_possibly_detected")
 
             elif detected == "stegano_no_key":
                 stegano_discover()
@@ -1041,7 +1038,39 @@ class Discover_PNG_MP3_Detected(tk.Frame):
 
         output_mp3_button.pack()
 
+class key_possibly_detected(tk.Frame):
 
+    def no_key(self):
+        stegano_discover()
+        self.controller.show_frame("Create_Success")
+
+    def with_key(self):
+        self.controller.show_frame("Discover_PNG_Key_Detected")
+
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        label = tk.Label(self, text="Discover: KEY POSSIBLY DETECTED", font=controller.title_font)
+        label.config(bg="light blue")
+        label.pack(side="top", fill="x", pady=10)
+
+        label = tk.Label(self, text="There is a possibility that the payload \nis encrypted with a key. \n Would you like to proceed with a key?", font=controller.normal_font)
+        label.pack(side="top", fill="x", pady=10)
+
+        yes_key_button = tk.Button(self, text="Yes",
+                                command=self.with_key)
+        no_key_button = tk.Button(self, text="No",
+                                    command=self.no_key)
+
+
+        home_button = tk.Button(self, text="Home",
+                                command=lambda: controller.show_frame("StartPage"))
+
+
+        yes_key_button.pack()
+        no_key_button.pack()
+        home_button.pack(side="bottom", pady=10)
 
 def file_grabber():
     root = tkinter.Tk()
@@ -1159,25 +1188,20 @@ def cryptosteganography_mp3(given_filepath, given_secret_mp3, given_secret_key, 
 
 def PNG_autodetect():
     global filepath
-    secret = ""
-    try:
-        crypto_steganography = CryptoSteganography("")
-        secret = crypto_steganography.retrieve(filepath)
-        #print(type(secret_message))
+    secret = lsb.reveal(filepath)
 
-        if not secret:
-            secret = "key"
-            #print("there is a key")
-
-        else:
-            secret = "False"
-            print("no key")
-    except:
+    if " " in secret:
         secret = "stegano_no_key"
+
+    else:
+        secret = "maybe_key"
+        #print("there is a key")
+
 
     return secret
 
 def stegano_discover():
+    global filepath
     write_data = lsb.reveal(filepath)
     #print(type(write_data))
 
