@@ -10,7 +10,7 @@ from stegano import lsb
 from cryptosteganography import CryptoSteganography
 
 
-class SampleApp(tk.Tk):
+class StegBeetle(tk.Tk):
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -902,6 +902,8 @@ class Discover_Confirmation(tk.Frame):
             elif detected == "stegano_no_key":
                 stegano_discover()
                 self.controller.show_frame("Create_Success")
+            elif detected == "no_steg":
+                self.controller.show_frame("Something_Went_Wrong")
             else:
                 mp3_detect = detect_mp3()
                 if mp3_detect == "True":
@@ -1189,13 +1191,16 @@ def cryptosteganography_mp3(given_filepath, given_secret_mp3, given_secret_key, 
 def PNG_autodetect():
     global filepath
     secret = lsb.reveal(filepath)
+    try:
+        if " " in secret:
+            secret = "stegano_no_key"
 
-    if " " in secret:
-        secret = "stegano_no_key"
+        else:
+            secret = "maybe_key"
+            #print("there is a key")
 
-    else:
-        secret = "maybe_key"
-        #print("there is a key")
+    except TypeError:
+        secret = "no_steg"
 
 
     return secret
@@ -1256,17 +1261,5 @@ key = ""
 
 if __name__ == "__main__":
     config_loader()
-    app = SampleApp()
+    app = StegBeetle()
     app.mainloop()
-
-"""
-Worth mentioning
-STRENGTH:
-Auto detect keys
-Validation
-
-WEAKNESS:
-Config File means not an independent program that doesn't do everything on its own. Advantage of using it: makes sharing info between scripts easy. Also allows users to come back to sessions, as their options are saved.
-Multiple scripts because python version differences means its not standalone. Advantage: means I can use python2 libraries, expanding usability. 
-Sometimes punctuation (and sometimes numbers) do not make it into the hidden message process.
-"""
